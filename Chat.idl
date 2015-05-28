@@ -8,7 +8,11 @@ module ChatApp {
   interface Chat {
       string say(in ChatCallback objref, in string message);
       boolean join(in ChatCallback objref, in string name);
-    void post(in ChatCallback objref, in string message, in string name);
-    void leave(in ChatCallback objref, in string name);
+      void post(in ChatCallback objref, in string message, in string name);
+      void leave(in ChatCallback objref, in string name);
+      void list(in ChatCallback objref);
+      void play(in ChatCallback objref, in string name, in char marker);
+      void quit(in ChatCallback objref, in string name);
+      void set(in ChatCallback objref, in string name, in long x, in long y);
   };
 };

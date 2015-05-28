@@ -101,10 +101,25 @@ public class ChatClient
 		if ( !chatImpl.join(cref, name) )
 		    name = null;
 	    }
-	if ( action.equals("post") )
+	else if( action.equals("post") )
 	    chatImpl.post(cref, in.nextLine(), name);
-	if ( action.equals("leave") )
+	else if( action.equals("leave") )
 	    chatImpl.leave(cref, name);
+	else if( action.equals("list") )
+	    chatImpl.list(cref);
+	else if( action.equals("play") )
+	    {
+		String marker = in.nextLine();
+		chatImpl.play(cref, name, marker.charAt(0));
+	    }
+	else if( action.equals("quit") )
+	    chatImpl.quit(cref, name);
+	else if( action.equals("set") )
+	    {
+		String line = in.nextLine();
+		String[] args = line.split(" ");
+		chatImpl.set(cref,name,Integer.parseInt(args[0]),Integer.parseInt(args[1]));
+	    }
 	else
 	    chatImpl.say(cref, "command not found");
 	return;

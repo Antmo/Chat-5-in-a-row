@@ -6,6 +6,8 @@ import org.omg.PortableServer.*;
 import org.omg.PortableServer.POA;
  
 import java.util.Vector;
+import java.util.Arrays;
+
 
 class ChatImpl extends ChatPOA
 {
@@ -13,6 +15,8 @@ class ChatImpl extends ChatPOA
     
 	String name;
 	ChatCallback ref;
+	boolean playing = false;
+	char marker = '+';
 
 	public User(ChatCallback obj, String msg)
 	{
@@ -21,31 +25,98 @@ class ChatImpl extends ChatPOA
 	}
 	
     };
-    
+
+    class Game {
+	int HEIGHT = 5;
+	int WIDTH  = 5;
+	char def_mark = '+';
+
+	char[][] gameBoard = new char[HEIGHT][WIDTH];
+
+	public Game()
+	{
+	    for(char[] row : gameBoard )
+		Arrays.fill(row, def_mark);
+	}
+
+	public void set(int x, int y, char marker)
+	{
+	    if( x-1 > WIDTH || x-1 < 0 
+		|| y-1 > HEIGHT || y-1 < 0 )
+		return;
+	    if (gameBoard[x-1][y-1] == def_mark)
+		gameBoard[x-1][y-1] = marker;
+	    //checkforwieners 
+	}
+	
+	public String print()
+	{
+	    String board = "";
+	    for( int i = 0; i < HEIGHT; ++i ) 
+		{
+		    for( int j = 0; j < WIDTH; ++j ) 
+			{
+			    board += (gameBoard[i][j]) + " ";
+			}
+		    board += '\n';
+		}
+	    return board;
+		    //		System.out.println(Arrays.toString(gameBoard));
+	}
+    };
+
+    private Game theGame = new Game();
     private Vector<User> USERS = new Vector<User>();
     private ORB orb;
 
     public void setORB(ORB orb_val) {
         orb = orb_val;
     }
+    
+    public void printGameBoard(ChatCallback callobj)
+    {
+	callobj.callback(theGame.print());
+    }
 
+    public void set(ChatCallback callobj, String name, int xCoord, int yCoord)
+    {
+	User usr = findUser(name);
+	if(usr != null && !usr.playing)
+	    {
+		say(callobj, "You're not in a game, type 'play {X, O}' to play");
+		return;
+	    }
+	theGame.set(xCoord,yCoord,usr.marker);
+	printGameBoard(callobj);
+    }
+
+    public User findUser(String name)
+    {
+	for ( User obj : USERS )
+	    {
+		if (obj.name.equals(name))
+		    return obj;
+	    } 
+	return null;
+    }
+
+    /* CHAT */
     public String say(ChatCallback callobj, String msg)
     {
         callobj.callback(msg);
-        return ("         ....Goodbye!\n");
+	return ("         ....Goodbye!\n");
     }
 
     public boolean join(ChatCallback callobj, String name)
     {
-	for ( User obj : USERS )
+	User usr = findUser(name);
+
+	if(usr != null)
 	    {
-		System.out.println(obj.name);
-		if (obj.name.equals(name))
-		    {
-			callobj.callback(name + " is taken");
-			return false;
-		    }
+		callobj.callback(name + " is taken");
+		return false;
 	    } 
+
 	USERS.add(new User(callobj,name));
 	broadcast(name + " has joined");
 
@@ -60,17 +131,70 @@ class ChatImpl extends ChatPOA
 
     public void leave(ChatCallback callobj, String name)
     {
-	for( User obj : USERS )
+	User usr = findUser(name);
+
+	if(usr != null)
 	    {
-		if(obj.name.equals(name))
-		    {
-			//			unsigned index = USERS.indexOf(obj);
-			USERS.remove(USERS.indexOf(obj));
-			broadcast(name + " has left.");
-			return;
-		    }
+		USERS.remove(USERS.indexOf(usr));	    
+		broadcast(name + " has left.");
+	    }
+	
+	return;
+    }
+    
+    public void list(ChatCallback callobj)
+    {
+	callobj.callback("Users online:");
+	for ( User obj : USERS )
+	    callobj.callback(obj.name);
+
+	return;
+    }
+
+    public void play(ChatCallback callobj, String name, char marker)
+    {
+	User usr = findUser(name);
+
+	if(usr == null)
+	    {
+		say(callobj, "Please join the chat before playing a game.");
+	    }
+	else if( usr.playing )
+	    {
+		say(callobj, "You're already in a game. Type 'quit' to leave");
+	    }
+	else
+	    {
+		usr.playing = true;
+
+		if(marker == 'X' || marker == 'O')
+		    usr.marker = marker;
+		else
+		    usr.marker = 'X';
+
+		say(callobj, "Welcome to the game. Your marker is: " + usr.marker);
+		printGameBoard(callobj);
+	    }
+	return;
+    }
+    
+    public void quit(ChatCallback objref, String name)
+    {
+	User usr = findUser(name);
+
+	if( usr == null )
+	    {
+		say(objref, "You're not an active member of the community");
+	    }
+	else if ( !usr.playing )
+	    say(objref, "You're not in a game");
+	else
+	    {
+		usr.playing = false;
+		say(objref, "Left the game");
 	    }
     }
+
     private void broadcast(String msg)
     {
 	for( User obj : USERS )
@@ -114,7 +238,7 @@ public class ChatServer
 
 	    // Application code goes below
 	    System.out.println("ChatServer ready and waiting ...");
-	    
+
 	    // wait for invocations from clients
 	    orb.run();
 	}
