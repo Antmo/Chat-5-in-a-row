@@ -5,8 +5,24 @@ import org.omg.CORBA.*;     // All CORBA applications need these classes.
 import org.omg.PortableServer.*;   
 import org.omg.PortableServer.POA;
  
+import java.util.Vector;
+
 class ChatImpl extends ChatPOA
 {
+    class User {
+    
+	String name;
+	ChatCallback ref;
+
+	public User(ChatCallback obj, String msg)
+	{
+	    name = msg;
+	    ref = obj;
+	}
+	
+    };
+    
+    private Vector<User> USERS = new Vector<User>();
     private ORB orb;
 
     public void setORB(ORB orb_val) {
@@ -17,6 +33,50 @@ class ChatImpl extends ChatPOA
     {
         callobj.callback(msg);
         return ("         ....Goodbye!\n");
+    }
+
+    public boolean join(ChatCallback callobj, String name)
+    {
+	for ( User obj : USERS )
+	    {
+		System.out.println(obj.name);
+		if (obj.name.equals(name))
+		    {
+			callobj.callback(name + " is taken");
+			return false;
+		    }
+	    } 
+	USERS.add(new User(callobj,name));
+	broadcast(name + " has joined");
+
+	callobj.setName(name);
+	return true;
+    }
+
+    public void post(ChatCallback callobj, String msg, String name)
+    {
+	broadcast(name +" says: "+  msg);
+    }
+
+    public void leave(ChatCallback callobj, String name)
+    {
+	for( User obj : USERS )
+	    {
+		if(obj.name.equals(name))
+		    {
+			//			unsigned index = USERS.indexOf(obj);
+			USERS.remove(USERS.indexOf(obj));
+			broadcast(name + " has left.");
+			return;
+		    }
+	    }
+    }
+    private void broadcast(String msg)
+    {
+	for( User obj : USERS )
+	    {
+		obj.ref.callback(msg);
+	    }
     }
 }
 
@@ -30,8 +90,8 @@ public class ChatServer
 
 	    // create servant (impl) and register it with the ORB
 	    ChatImpl chatImpl = new ChatImpl();
-	    chatImpl.setORB(orb); 
-
+	    chatImpl.setORB(orb);
+	    
 	    // get reference to rootpoa & activate the POAManager
 	    POA rootpoa = 
 		POAHelper.narrow(orb.resolve_initial_references("RootPOA"));  

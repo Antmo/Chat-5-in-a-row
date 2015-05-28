@@ -5,12 +5,16 @@ import org.omg.CORBA.*;     // All CORBA applications need these classes.
 import org.omg.PortableServer.*;   
 import org.omg.PortableServer.POA;
 
+import java.util.Scanner;
+
  
 class ChatCallbackImpl extends ChatCallbackPOA
 {
     private ORB orb;
+    private String name = "Sirius";
 
-    public void setORB(ORB orb_val) {
+    public void setORB(ORB orb_val) 
+    {
         orb = orb_val;
     }
 
@@ -18,12 +22,23 @@ class ChatCallbackImpl extends ChatCallbackPOA
     {
         System.out.println(notification);
     }
+
+    public void setName(String name)
+    {
+	this.name = name;
+    }
+    
+    public String getName()
+    {
+	return this.name;
+    }
 }
 
 public class ChatClient
 {
     static Chat chatImpl;
-    
+    static String name;
+
     public static void main(String args[])
     {
 	try {
@@ -57,9 +72,42 @@ public class ChatClient
 	    String chat = chatImpl.say(cref, "\n  Hello....");
 	    System.out.println(chat);
 	    
+	    String action;
+	    Scanner in = new Scanner(System.in);
+	    
+	    while(true)
+		{
+		    action = in.nextLine();
+		    executeCommand(cref, action);
+		    //		    chatImpl.say(cref, action);
+		}
+	    
+	    
 	} catch(Exception e){
 	    System.out.println("ERROR : " + e);
 	    e.printStackTrace(System.out);
 	}
     }
+
+    private static void executeCommand(ChatCallback cref, String action)
+    {
+	Scanner in = new Scanner(System.in);
+	// 	String msg = command.substring(command.indexOf(" "),command.length() );
+	//	String action = command.substring(0,command.indexOf(" "));
+
+	if( action.equals("join") )
+	    {
+		name = in.nextLine();
+		if ( !chatImpl.join(cref, name) )
+		    name = null;
+	    }
+	if ( action.equals("post") )
+	    chatImpl.post(cref, in.nextLine(), name);
+	if ( action.equals("leave") )
+	    chatImpl.leave(cref, name);
+	else
+	    chatImpl.say(cref, "command not found");
+	return;
+    }
 }
+
