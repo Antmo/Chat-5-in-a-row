@@ -27,9 +27,13 @@ class ChatImpl extends ChatPOA
     };
 
     class Game {
-	int HEIGHT = 5;
-	int WIDTH  = 5;
-	char def_mark = '+';
+	// Can I use private in java? ...
+	private int HEIGHT = 5;
+	private int WIDTH  = 5;
+	private char def_mark = '+';
+	private char tm1_mark = 'X';
+	private char tm2_mark = 'O';
+	private char win_mark;
 
 	char[][] gameBoard = new char[HEIGHT][WIDTH];
 
@@ -46,14 +50,85 @@ class ChatImpl extends ChatPOA
 		return false;
 	    if (gameBoard[x-1][y-1] == def_mark)
 		gameBoard[x-1][y-1] = marker;
-	    else
-		return false;
+	    //	    else
+	    //		return false;
 
 	    //checkforwinners 
-
+	    if( checkWinner() )
+		{
+		    // Broadcast to players that game is over
+		    // Reset board
+		}
+		
 	    return true;
 	}
 	
+	private boolean checkWinner()
+	{
+
+	    /*  pair<char, int> doesn't exist in java.
+	    *   stackoverflow told me to write a new class for it
+	    *   but I don't really want to ...
+	    *   As a result, alot of the stuff below is hardcoded and ugly
+	    */
+
+	    int xcnt = 0;
+	    int ocnt = 0;
+
+	    /* Horizontal check */
+	    for(int i = 0; i < HEIGHT; ++i)
+		{
+		    for(int j = 0; i < WIDTH; ++j)
+			{
+			    if( thegame.gameBoard[i][j] == def_mark )
+				xcnt = ocnt = 0;
+			    else if( theGame.gameBoard[i][j] == tm1_mark )
+				++xcnt;
+			    else if( theGame.gameBoard[i][j] == tm2_mark )
+				++ocnt;
+			}
+		    if(xcnt == 5)
+			{
+			    this.win_mark = 'X';
+			    return true;
+			}
+		    else if(ocnt == 5)
+			{
+			    this.win_mark = 'O';
+			    return true;
+			}
+		}
+
+	    /* Vertical check*/
+	    for(int i = 0; i < HEIGHT; ++i)
+		{
+		    for(int j = 0; i < WIDTH; ++j)
+			{
+			    if( thegame.gameBoard[j][i] == def_mark )
+				xcnt = ocnt = 0;
+			    else if( theGame.gameBoard[j][i] == tm1_mark )
+				++xcnt;
+			    else if( theGame.gameBoard[j][i] == tm2_mark )
+				++ocnt;
+			}
+		    if(xcnt == 5)
+			{
+			    this.win_mark = 'X';
+			    return true;
+			}
+		    else if(ocnt == 5)
+			{
+			    this.win_mark = 'O';
+			    return true;
+			}
+		}
+
+	    /* Diagonal check */
+	    // code here
+
+	    /* Anti diagonal check */
+	    //code here
+	}
 	public String print()
 	{
 	    String board = "";
