@@ -39,14 +39,19 @@ class ChatImpl extends ChatPOA
 		Arrays.fill(row, def_mark);
 	}
 
-	public void set(int x, int y, char marker)
+	public boolean set(int x, int y, char marker)
 	{
-	    if( x-1 > WIDTH || x-1 < 0 
-		|| y-1 > HEIGHT || y-1 < 0 )
-		return;
+	    if( x-1 > WIDTH  || x-1 < 0 || 
+		y-1 > HEIGHT || y-1 < 0 )
+		return false;
 	    if (gameBoard[x-1][y-1] == def_mark)
 		gameBoard[x-1][y-1] = marker;
-	    //checkforwieners 
+	    else
+		return false;
+
+	    //checkforwinners 
+
+	    return true;
 	}
 	
 	public String print()
@@ -86,8 +91,12 @@ class ChatImpl extends ChatPOA
 		say(callobj, "You're not in a game, type 'play {X, O}' to play");
 		return;
 	    }
-	theGame.set(xCoord,yCoord,usr.marker);
-	printGameBoard(callobj);
+	if( theGame.set(xCoord,yCoord,usr.marker) )
+	    printGameBoard(callobj);
+	else
+	    say(callobj, "Invalid move");
+
+	return;
     }
 
     public User findUser(String name)
@@ -184,7 +193,7 @@ class ChatImpl extends ChatPOA
 
 	if( usr == null )
 	    {
-		say(objref, "You're not an active member of the community");
+		say(objref, "You're not in a chat");
 	    }
 	else if ( !usr.playing )
 	    say(objref, "You're not in a game");

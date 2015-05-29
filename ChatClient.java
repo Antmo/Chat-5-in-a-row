@@ -38,6 +38,8 @@ public class ChatClient
 {
     static Chat chatImpl;
     static String name;
+    static String commands = 
+"# Available commands\tDescription\n# 'join <name>'\t\tjoin a chat room\n# 'post <message>'\tpost a message\n# 'list'\t\tlist members in chat room\n# 'play <marker>'\tjoin a game of five in a row\n# 'set X Y'\t\tset marker at position (X,Y)\n# 'quit'\t\tleave the game\n# 'help'\t\tdisplay this message\n# '?'\t\t\tequivalent to 'help'\n";
 
     public static void main(String args[])
     {
@@ -91,6 +93,12 @@ public class ChatClient
 
     private static void executeCommand(ChatCallback cref, String action)
     {
+
+	/* TODO 
+	 * Improve the input parsing below
+	 * Some inputs may cause a crash
+	 */
+
 	Scanner in = new Scanner(System.in);
 	// 	String msg = command.substring(command.indexOf(" "),command.length() );
 	//	String action = command.substring(0,command.indexOf(" "));
@@ -120,6 +128,8 @@ public class ChatClient
 		String[] args = line.split(" ");
 		chatImpl.set(cref,name,Integer.parseInt(args[0]),Integer.parseInt(args[1]));
 	    }
+	else if( action.equals("help") || action.equals("?") )
+	    chatImpl.say(cref, commands);
 	else
 	    chatImpl.say(cref, "command not found");
 	return;
