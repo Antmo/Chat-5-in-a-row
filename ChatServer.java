@@ -79,7 +79,7 @@ class ChatImpl extends ChatPOA
 	    for(int i = 0; i < HEIGHT; ++i)
 		{
 		    for(int j = 0; i < WIDTH; ++j)
-			{
+			{ /* This will not work, must check previous marker & reset if it doesnt match */
 			    if( thegame.gameBoard[i][j] == def_mark )
 				xcnt = ocnt = 0;
 			    else if( theGame.gameBoard[i][j] == tm1_mark )
