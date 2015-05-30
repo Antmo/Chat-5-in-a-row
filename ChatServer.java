@@ -87,6 +87,8 @@ class ChatImpl extends ChatPOA
 			    else if( theGame.gameBoard[i][j] == tm2_mark )
 				++ocnt;
 			}
+			
+			/* TODO Change these two if's to one using a ternary operator */
 		    if(xcnt == 5)
 			{
 			    this.win_mark = 'X';
