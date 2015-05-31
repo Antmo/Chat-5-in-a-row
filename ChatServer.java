@@ -45,92 +45,130 @@ class ChatImpl extends ChatPOA
 
 	public boolean set(int x, int y, char marker)
 	{
-	    if( x-1 > WIDTH  || x-1 < 0 || 
-		y-1 > HEIGHT || y-1 < 0 )
-		return false;
-	    if (gameBoard[x-1][y-1] == def_mark)
-		gameBoard[x-1][y-1] = marker;
-	    //	    else
-	    //		return false;
+			int xpos = x-1;
+			int ypos = y-1;
 
-	    //checkforwinners 
-	    if( checkWinner() )
-		{
-		    // Broadcast to players that game is over
-		    // Reset board
-		}
+	    if( x > WIDTH  || xpos < 0 || 
+					y > HEIGHT || ypos < 0 )
+				return false;
+
+	    if (gameBoard[ypos][xpos] == def_mark)
+		gameBoard[ypos][xpos] = marker;
+			else
+				return false;
 		
 	    return true;
 	}
 	
-	private boolean checkWinner()
+	/* you really only need to check from the position that was just set */
+	private boolean checkWinner(int x, int y, char marker)
 	{
-
 	    /*  pair<char, int> doesn't exist in java.
 	    *   stackoverflow told me to write a new class for it
 	    *   but I don't really want to ...
 	    *   As a result, alot of the stuff below is hardcoded and ugly
 	    */
 
-	    int xcnt = 0;
-	    int ocnt = 0;
+			int xpos = x-1;
+			int ypos = y-1;
+			/* horizontal */
+			int horiz = x-5;
+			int step = 0;
+			for (int i = 0; i < 5; ++i )
+			{
+				if ( horiz >= 0 && horiz < WIDTH )
+				{
+					while ( gameBoard[ypos][horiz] == marker )
+					{
+						/*basicly if we managed five in a row*/
+						if (horiz++ == xpos+step )
+							return true;
 
-	    /* Horizontal check */
-	    for(int i = 0; i < HEIGHT; ++i)
-		{
-		    for(int j = 0; i < WIDTH; ++j)
-			{ /* This will not work, must check previous marker & reset if it doesnt match */
-			    if( thegame.gameBoard[i][j] == def_mark )
-				xcnt = ocnt = 0;
-			    else if( theGame.gameBoard[i][j] == tm1_mark )
-				++xcnt;
-			    else if( theGame.gameBoard[i][j] == tm2_mark )
-				++ocnt;
+						if (horiz > WIDTH-1 )
+							break;
+					}
+				}
+					++step;
+					horiz = x-5+step;
 			}
-			
-			/* TODO Change these two if's to one using a ternary operator */
-		    if(xcnt == 5)
-			{
-			    this.win_mark = 'X';
-			    return true;
-			}
-		    else if(ocnt == 5)
-			{
-			    this.win_mark = 'O';
-			    return true;
-			}
-		}
 
-	    /* Vertical check*/
-	    for(int i = 0; i < HEIGHT; ++i)
-		{
-		    for(int j = 0; i < WIDTH; ++j)
+			/* vertical */
+			int verti = y-5;
+			step = 0;
+			for (int i = 0; i < 5; ++i )
 			{
-			    if( thegame.gameBoard[j][i] == def_mark )
-				xcnt = ocnt = 0;
-			    else if( theGame.gameBoard[j][i] == tm1_mark )
-				++xcnt;
-			    else if( theGame.gameBoard[j][i] == tm2_mark )
-				++ocnt;
+				if ( verti >= 0 && verti < HEIGHT )
+				{
+					while ( gameBoard[verti][xpos] == marker )
+					{
+						/*basicly if we managed five in a row*/
+						if (verti++ == ypos+step )
+							return true;
+
+						if (verti > HEIGHT-1 )
+							break;
+					}
+				}
+					++step;
+					verti = y-5+step;
 			}
-		    if(xcnt == 5)
-			{
-			    this.win_mark = 'X';
-			    return true;
-			}
-		    else if(ocnt == 5)
-			{
-			    this.win_mark = 'O';
-			    return true;
-			}
-		}
 
 	    /* Diagonal check */
-	    // code here
+			verti = y-5;
+			horiz = x-5;
+			step = 0;
+			for ( int i = 0; i < 5; ++i )
+			{
+				if ( verti >= 0 && verti < HEIGHT &&
+						 horiz >= 0 && horiz < WIDTH )
+				{
+					while( gameBoard[verti][horiz] == marker )
+					{
+						/*basicly if we managed five in a row*/
+						if( (horiz == xpos+step) ) //no need to check both
+							return true;
 
-	    /* Anti diagonal check */
-	    //code here
-	}
+						horiz++; //cant have these in && since only the left hand
+						verti++; //is performed if the lefthand fails
+
+						if ( horiz > WIDTH-1 || verti > HEIGHT-1 )
+								break;
+					}
+				}
+				++step;
+				horiz = x-5+step;
+				verti = y-5+step;
+			}
+
+			/* Anti-diagonal */
+			verti = y-5;
+			horiz = xpos+5; //this is tricky havnt thought so hard on it
+			step = 0;
+			for ( int i = 0; i < 5; ++i )
+			{
+				if ( verti >= 0 && verti < HEIGHT &&
+						 horiz >= 0 && horiz < WIDTH )
+				{
+					while( gameBoard[verti][horiz] == marker )
+					{
+						/*basicly if we managed five in a row*/
+						if( (horiz == xpos-step))
+							return true;
+
+						horiz--;
+						verti++;
+						if ( horiz < 0 || verti > HEIGHT-1 )
+								break;
+					}
+				}
+				++step;
+				horiz = xpos+5-step; //tricky tricky
+				verti = y-5+step;
+			}
+
+			return false;
+	}	
+
 	public String print()
 	{
 	    String board = "";
@@ -169,7 +207,13 @@ class ChatImpl extends ChatPOA
 		return;
 	    }
 	if( theGame.set(xCoord,yCoord,usr.marker) )
+	{
 	    printGameBoard(callobj);
+		if (	theGame.checkWinner(xCoord,yCoord,usr.marker) )
+		{	
+			say(callobj, "You won");
+		}
+	}
 	else
 	    say(callobj, "Invalid move");
 
