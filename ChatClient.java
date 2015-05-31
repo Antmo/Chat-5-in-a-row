@@ -6,13 +6,12 @@ import org.omg.PortableServer.*;
 import org.omg.PortableServer.POA;
 
 import java.util.Scanner;
+import java.util.Arrays;
 
  
 class ChatCallbackImpl extends ChatCallbackPOA
 {
     private ORB orb;
-    private String name = "Sirius";
-
     public void setORB(ORB orb_val) 
     {
         orb = orb_val;
@@ -22,24 +21,14 @@ class ChatCallbackImpl extends ChatCallbackPOA
     {
         System.out.println(notification);
     }
-
-    public void setName(String name)
-    {
-	this.name = name;
-    }
-    
-    public String getName()
-    {
-	return this.name;
-    }
 }
 
 public class ChatClient
 {
     static Chat chatImpl;
-    static String name;
+    static String name = "NULL";
     static String commands = 
-"# Available commands\tDescription\n# 'join <name>'\t\tjoin a chat room\n# 'post <message>'\tpost a message\n# 'list'\t\tlist members in chat room\n# 'play <marker>'\tjoin a game of five in a row\n# 'set X Y'\t\tset marker at position (X,Y)\n# 'quit'\t\tleave the game\n# 'help'\t\tdisplay this message\n# '?'\t\t\tequivalent to 'help'\n";
+"# Available commands\tDescription\n# 'join <name>'\t\tjoin a chat room\n# 'post <message>'\tpost a message\n# 'list'\t\tlist members in chat room\n# 'play <marker>'\tjoin a game of five in a row\n# 'set X Y'\t\tset marker at position (X,Y)\n# 'quit'\t\tleave the game\n# 'leave'\t\tleave the chat\n# 'help'\t\tdisplay this message\n# '?'\t\t\tequivalent to 'help'\n";
 
     public static void main(String args[])
     {
@@ -99,40 +88,49 @@ public class ChatClient
 	 * Some inputs may cause a crash
 	 */
 
-	Scanner in = new Scanner(System.in);
-	// 	String msg = command.substring(command.indexOf(" "),command.length() );
-	//	String action = command.substring(0,command.indexOf(" "));
-
-	if( action.equals("join") )
-	    {
-		name = in.nextLine();
-		if ( !chatImpl.join(cref, name) )
-		    name = null;
-	    }
-	else if( action.equals("post") )
-	    chatImpl.post(cref, in.nextLine(), name);
-	else if( action.equals("leave") )
+	String [] args = action.split(" ");
+	switch (args[0])
+	{
+		case "join" :
+			if (args.length != 2 )
+				chatImpl.say(cref, commands);
+			else if (chatImpl.join(cref,args[1]) )
+				name = args[1];
+			break;
+		case "post" :
+	    chatImpl.post(cref, Arrays.toString(args), name);
+			break;
+		case "leave" :
 	    chatImpl.leave(cref, name);
-	else if( action.equals("list") )
+			break;
+		case "list" :
 	    chatImpl.list(cref);
-	else if( action.equals("play") )
-	    {
-		String marker = in.nextLine();
-		chatImpl.play(cref, name, marker.charAt(0));
-	    }
-	else if( action.equals("quit") )
+			break;
+		case "play" :
+			if (args.length == 2 )
+				chatImpl.play(cref, name,(char)'X');
+			else
+				chatImpl.say(cref, commands);
+			break;
+		case "quit" :
 	    chatImpl.quit(cref, name);
-	else if( action.equals("set") )
-	    {
-		String line = in.nextLine();
-		String[] args = line.split(" ");
-		chatImpl.set(cref,name,Integer.parseInt(args[0]),Integer.parseInt(args[1]));
-	    }
-	else if( action.equals("help") || action.equals("?") )
+			break;
+		case "set" :
+			if (args.length == 3 )
+				chatImpl.set(cref,name,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
+			else
+				chatImpl.say(cref, commands);
+			break;
+		case "help" :
 	    chatImpl.say(cref, commands);
-	else
+			break;
+		case "?" :
 	    chatImpl.say(cref, "command not found");
+			break;
+		default:
+	    chatImpl.say(cref, "command not found");
+	}
 	return;
-    }
+	}
 }
 

@@ -8,7 +8,6 @@ import org.omg.PortableServer.POA;
 import java.util.Vector;
 import java.util.Arrays;
 
-
 class ChatImpl extends ChatPOA
 {
     class User {
@@ -39,8 +38,13 @@ class ChatImpl extends ChatPOA
 
 	public Game()
 	{
-	    for(char[] row : gameBoard )
-		Arrays.fill(row, def_mark);
+			clear_board();
+	}
+
+	public void clear_board()
+	{
+	  for(char[] row : gameBoard )
+			Arrays.fill(row, def_mark);
 	}
 
 	public boolean set(int x, int y, char marker)
@@ -72,7 +76,7 @@ class ChatImpl extends ChatPOA
 			int xpos = x-1;
 			int ypos = y-1;
 			/* horizontal */
-			int horiz = x-5;
+			int horiz = xpos-4;
 			int step = 0;
 			for (int i = 0; i < 5; ++i )
 			{
@@ -81,19 +85,19 @@ class ChatImpl extends ChatPOA
 					while ( gameBoard[ypos][horiz] == marker )
 					{
 						/*basicly if we managed five in a row*/
-						if (horiz++ == xpos+step )
+						if (horiz == xpos+step )
 							return true;
 
-						if (horiz > WIDTH-1 )
+						if (++horiz > WIDTH-1 )
 							break;
 					}
 				}
 					++step;
-					horiz = x-5+step;
+					horiz = xpos-4+step;
 			}
 
 			/* vertical */
-			int verti = y-5;
+			int verti = ypos-4;
 			step = 0;
 			for (int i = 0; i < 5; ++i )
 			{
@@ -102,20 +106,20 @@ class ChatImpl extends ChatPOA
 					while ( gameBoard[verti][xpos] == marker )
 					{
 						/*basicly if we managed five in a row*/
-						if (verti++ == ypos+step )
+						if (verti == ypos+step )
 							return true;
 
-						if (verti > HEIGHT-1 )
+						if (++verti > HEIGHT-1 )
 							break;
 					}
 				}
 					++step;
-					verti = y-5+step;
+					verti = ypos-4+step;
 			}
 
 	    /* Diagonal check */
-			verti = y-5;
-			horiz = x-5;
+			verti = ypos-4;
+			horiz = xpos-4;
 			step = 0;
 			for ( int i = 0; i < 5; ++i )
 			{
@@ -128,21 +132,18 @@ class ChatImpl extends ChatPOA
 						if( (horiz == xpos+step) ) //no need to check both
 							return true;
 
-						horiz++; //cant have these in && since only the left hand
-						verti++; //is performed if the lefthand fails
-
-						if ( horiz > WIDTH-1 || verti > HEIGHT-1 )
+						if ( ++horiz > WIDTH-1 || ++verti > HEIGHT-1 )
 								break;
 					}
 				}
 				++step;
-				horiz = x-5+step;
-				verti = y-5+step;
+				horiz = xpos-4+step;
+				verti = ypos-4+step;
 			}
 
 			/* Anti-diagonal */
-			verti = y-5;
-			horiz = xpos+5; //this is tricky havnt thought so hard on it
+			verti = ypos-4;
+			horiz = xpos+4; //this is tricky havnt thought so hard on it
 			step = 0;
 			for ( int i = 0; i < 5; ++i )
 			{
@@ -152,18 +153,16 @@ class ChatImpl extends ChatPOA
 					while( gameBoard[verti][horiz] == marker )
 					{
 						/*basicly if we managed five in a row*/
-						if( (horiz == xpos-step))
+						if( (horiz == xpos+step))
 							return true;
 
-						horiz--;
-						verti++;
-						if ( horiz < 0 || verti > HEIGHT-1 )
+						if ( --horiz < 0 || ++verti > HEIGHT-1 )
 								break;
 					}
 				}
 				++step;
-				horiz = xpos+5-step; //tricky tricky
-				verti = y-5+step;
+				horiz = xpos+4-step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
+				verti = ypos-4+step;
 			}
 
 			return false;
@@ -237,10 +236,10 @@ class ChatImpl extends ChatPOA
 	return ("         ....Goodbye!\n");
     }
 
-    public boolean join(ChatCallback callobj, String name)
+    public boolean join(ChatCallback callobj,String name)
     {
-	User usr = findUser(name);
 
+	User usr = findUser(name);
 	if(usr != null)
 	    {
 		callobj.callback(name + " is taken");
@@ -250,7 +249,6 @@ class ChatImpl extends ChatPOA
 	USERS.add(new User(callobj,name));
 	broadcast(name + " has joined");
 
-	callobj.setName(name);
 	return true;
     }
 

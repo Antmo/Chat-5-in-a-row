@@ -2,7 +2,6 @@ module ChatApp {
 
   interface ChatCallback {
      void callback(in string message);
-     void setName(in string name);
   };
 
   interface Chat {
