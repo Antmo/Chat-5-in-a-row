@@ -1,7 +1,9 @@
-# chat
+# Real-time chat with five-in-a-row
 Chat client including a game of five-in-a-row for a university course.
-
+***
 Instructions below, courtesy of https://www.ida.liu.se/~TDTS04/labs/2015/Chat/lab5.html
+
+(Commands marked with %.)
 
 How to compile and run:
 
@@ -15,15 +17,14 @@ How to compile and run:
 
 % make c
 
-/usr/bin/javac ChatClient.java ChatApp/
-
-*.java
+/usr/bin/javac ChatClient.java ChatApp/*.java
 
 % make s
 
 /usr/bin/javac ChatServer.java ChatApp/*.java
 
 
+***
 Start the name server in the first window. The example below assumes that you have chosen port number 1057.
 
 
@@ -32,7 +33,7 @@ Start the name server in the first window. The example below assumes that you ha
 orbd -ORBInitialPort 1057 -ORBInitialHost
 
 localhost
-
+***
 Start the chat server in the second terminal window:
 
 
@@ -45,7 +46,7 @@ Start the chat server in the second terminal window:
 ChatServer ready and waiting ...
 
 
-
+***
 Finally, start up the chat client in the third window:
 
 
