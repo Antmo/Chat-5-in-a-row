@@ -28,6 +28,8 @@ class ChatImpl extends ChatPOA
     class Game {
 	protected int HEIGHT = 5;
 	protected int WIDTH  = 5;
+	protected int free_slots = HEIGHT*WIDTH;
+	
 	protected char def_mark = '+';
 	protected char tm1_mark = 'X';
 	protected char tm2_mark = 'O';
@@ -36,7 +38,7 @@ class ChatImpl extends ChatPOA
 	protected int tm1_score = 0;
 	protected int tm2_score = 0;
 
-	char[][] gameBoard = new char[HEIGHT][WIDTH];
+	protected char[][] gameBoard = new char[HEIGHT][WIDTH];
 
 	public Game()
 	{
@@ -241,6 +243,11 @@ class ChatImpl extends ChatPOA
 				    }
 			    }
 		    }
+		elseif( --theGame.free_slots == 0 )
+		{
+			/* Reset board & broadcast to active players*/
+		}
+		
 	    }
 	else
 	    say(callobj, "Invalid move");
