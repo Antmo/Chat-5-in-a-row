@@ -23,10 +23,9 @@ class ChatImpl extends ChatPOA
 	    ref = obj;
 	}
 	
-    };
+    }; /* end class User */
 
     class Game {
-	// Can I use private in java? ...
 	protected int HEIGHT = 5;
 	protected int WIDTH  = 5;
 	protected char def_mark = '+';
@@ -67,14 +66,12 @@ class ChatImpl extends ChatPOA
 	    return true;
 	}
 	
-	/* you really only need to check from the position that was just set */
+	/* 
+	*  Check for winners from the position that was just set.
+	*  This should run in O(1) time.
+	*/
 	private boolean checkWinner(int x, int y, char marker)
 	{
-	    /*  pair<char, int> doesn't exist in java.
-	     *   stackoverflow told me to write a new class for it
-	     *   but I don't really want to ...
-	     *   As a result, alot of the stuff below is hardcoded and ugly
-	     */
 
 	    int xpos = x-1;
 	    int ypos = y-1;
@@ -191,12 +188,11 @@ class ChatImpl extends ChatPOA
 		    board += '\n';
 		}
 	    return board;
-	    //		System.out.println(Arrays.toString(gameBoard));
 	}
-    };
+    }; /* end class Game*/
 
-    private Game theGame = new Game();
-    private Vector<User> USERS = new Vector<User>();
+    private Game theGame = new Game();                /* one instance of this runs on the server */
+    private Vector<User> USERS = new Vector<User>();  /* 'name-server' */
     private ORB orb;
 
     public void setORB(ORB orb_val) {
@@ -262,7 +258,9 @@ class ChatImpl extends ChatPOA
 	return null;
     }
 
-    /* CHAT */
+    /* 
+     * CHAT related functions 
+     */
     public String say(ChatCallback callobj, String msg)
     {
         callobj.callback(msg);
@@ -363,7 +361,7 @@ class ChatImpl extends ChatPOA
 		obj.ref.callback(msg);
 	    }
     }
-}
+} /* end class ChatImpl */
 
 public class ChatServer 
 {
