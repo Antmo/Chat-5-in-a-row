@@ -27,12 +27,15 @@ class ChatImpl extends ChatPOA
 
     class Game {
 	// Can I use private in java? ...
-	private int HEIGHT = 5;
-	private int WIDTH  = 5;
-	private char def_mark = '+';
-	private char tm1_mark = 'X';
-	private char tm2_mark = 'O';
-	private char win_mark;
+	protected int HEIGHT = 5;
+	protected int WIDTH  = 5;
+	protected char def_mark = '+';
+	protected char tm1_mark = 'X';
+	protected char tm2_mark = 'O';
+	protected char win_mark;
+
+	protected int tm1_score = 0;
+	protected int tm2_score = 0;
 
 	char[][] gameBoard = new char[HEIGHT][WIDTH];
 
@@ -142,8 +145,8 @@ class ChatImpl extends ChatPOA
 		}
 
 	    /* Anti-diagonal */
-	    verti = ypos-4;
-	    horiz = xpos+4; //this is tricky havnt thought so hard on it
+	    verti = ypos+4;
+	    horiz = xpos-4; //this is tricky havnt thought so hard on it
 	    step = 0;
 	    for ( int i = 0; i < 5; ++i )
 		{
@@ -161,12 +164,20 @@ class ChatImpl extends ChatPOA
 				}
 			}
 		    ++step;
-		    horiz = xpos+4-step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
+		    horiz = xpos-4+step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
 		    verti = ypos-4+step;
 		}
 
 	    return false;
 	}	
+
+	public void updateScore(char marker)
+	{
+	    if(marker == 'X')
+		++tm1_score;
+	    else
+		++tm2_score;
+	}
 
 	public String print()
 	{
@@ -219,6 +230,7 @@ class ChatImpl extends ChatPOA
 
 		if ( theGame.checkWinner(xCoord,yCoord,usr.marker) )
 		    {	
+			theGame.updateScore(usr.marker);
 			theGame.clear_board();
 
 			/* Broadcast reset gameboard to all currently active players */
@@ -226,7 +238,9 @@ class ChatImpl extends ChatPOA
 			    {
 				if(obj.playing)
 				    {
-					obj.ref.callback("Team " + usr.marker + " has won\nRestarting the game");
+					obj.ref.callback("Team " + usr.marker + " has won");
+					obj.ref.callback("Current score: [X:" + theGame.tm1_score + "] vs [O:" + theGame.tm2_score + "]");
+					obj.ref.callback("Restarting the game ...");
 					obj.ref.callback(theGame.print());
 				    }
 			    }
