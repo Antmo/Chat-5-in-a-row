@@ -38,28 +38,28 @@ class ChatImpl extends ChatPOA
 
 	public Game()
 	{
-			clear_board();
+	    clear_board();
 	}
 
 	public void clear_board()
 	{
-	  for(char[] row : gameBoard )
-			Arrays.fill(row, def_mark);
+	    for(char[] row : gameBoard )
+		Arrays.fill(row, def_mark);
 	}
 
 	public boolean set(int x, int y, char marker)
 	{
-			int xpos = x-1;
-			int ypos = y-1;
+	    int xpos = x-1;
+	    int ypos = y-1;
 
 	    if( x > WIDTH  || xpos < 0 || 
-					y > HEIGHT || ypos < 0 )
-				return false;
+		y > HEIGHT || ypos < 0 )
+		return false;
 
 	    if (gameBoard[ypos][xpos] == def_mark)
 		gameBoard[ypos][xpos] = marker;
-			else
-				return false;
+	    else
+		return false;
 		
 	    return true;
 	}
@@ -68,104 +68,104 @@ class ChatImpl extends ChatPOA
 	private boolean checkWinner(int x, int y, char marker)
 	{
 	    /*  pair<char, int> doesn't exist in java.
-	    *   stackoverflow told me to write a new class for it
-	    *   but I don't really want to ...
-	    *   As a result, alot of the stuff below is hardcoded and ugly
-	    */
+	     *   stackoverflow told me to write a new class for it
+	     *   but I don't really want to ...
+	     *   As a result, alot of the stuff below is hardcoded and ugly
+	     */
 
-			int xpos = x-1;
-			int ypos = y-1;
-			/* horizontal */
-			int horiz = xpos-4;
-			int step = 0;
-			for (int i = 0; i < 5; ++i )
+	    int xpos = x-1;
+	    int ypos = y-1;
+	    /* horizontal */
+	    int horiz = xpos-4;
+	    int step = 0;
+	    for (int i = 0; i < 5; ++i )
+		{
+		    if ( horiz >= 0 && horiz < WIDTH )
 			{
-				if ( horiz >= 0 && horiz < WIDTH )
+			    while ( gameBoard[ypos][horiz] == marker )
 				{
-					while ( gameBoard[ypos][horiz] == marker )
-					{
-						/*basicly if we managed five in a row*/
-						if (horiz == xpos+step )
-							return true;
+				    /*basicly if we managed five in a row*/
+				    if (horiz == xpos+step )
+					return true;
 
-						if (++horiz > WIDTH-1 )
-							break;
-					}
+				    if (++horiz > WIDTH-1 )
+					break;
 				}
-					++step;
-					horiz = xpos-4+step;
 			}
+		    ++step;
+		    horiz = xpos-4+step;
+		}
 
-			/* vertical */
-			int verti = ypos-4;
-			step = 0;
-			for (int i = 0; i < 5; ++i )
+	    /* vertical */
+	    int verti = ypos-4;
+	    step = 0;
+	    for (int i = 0; i < 5; ++i )
+		{
+		    if ( verti >= 0 && verti < HEIGHT )
 			{
-				if ( verti >= 0 && verti < HEIGHT )
+			    while ( gameBoard[verti][xpos] == marker )
 				{
-					while ( gameBoard[verti][xpos] == marker )
-					{
-						/*basicly if we managed five in a row*/
-						if (verti == ypos+step )
-							return true;
+				    /*basicly if we managed five in a row*/
+				    if (verti == ypos+step )
+					return true;
 
-						if (++verti > HEIGHT-1 )
-							break;
-					}
+				    if (++verti > HEIGHT-1 )
+					break;
 				}
-					++step;
-					verti = ypos-4+step;
 			}
+		    ++step;
+		    verti = ypos-4+step;
+		}
 
 	    /* Diagonal check */
-			verti = ypos-4;
-			horiz = xpos-4;
-			step = 0;
-			for ( int i = 0; i < 5; ++i )
+	    verti = ypos-4;
+	    horiz = xpos-4;
+	    step = 0;
+	    for ( int i = 0; i < 5; ++i )
+		{
+		    if ( verti >= 0 && verti < HEIGHT &&
+			 horiz >= 0 && horiz < WIDTH )
 			{
-				if ( verti >= 0 && verti < HEIGHT &&
-						 horiz >= 0 && horiz < WIDTH )
+			    while( gameBoard[verti][horiz] == marker )
 				{
-					while( gameBoard[verti][horiz] == marker )
-					{
-						/*basicly if we managed five in a row*/
-						if( (horiz == xpos+step) ) //no need to check both
-							return true;
+				    /*basicly if we managed five in a row*/
+				    if( (horiz == xpos+step) ) //no need to check both
+					return true;
 
-						if ( ++horiz > WIDTH-1 || ++verti > HEIGHT-1 )
-								break;
-					}
+				    if ( ++horiz > WIDTH-1 || ++verti > HEIGHT-1 )
+					break;
 				}
-				++step;
-				horiz = xpos-4+step;
-				verti = ypos-4+step;
 			}
+		    ++step;
+		    horiz = xpos-4+step;
+		    verti = ypos-4+step;
+		}
 
-			/* Anti-diagonal */
-			verti = ypos-4;
-			horiz = xpos+4; //this is tricky havnt thought so hard on it
-			step = 0;
-			for ( int i = 0; i < 5; ++i )
+	    /* Anti-diagonal */
+	    verti = ypos-4;
+	    horiz = xpos+4; //this is tricky havnt thought so hard on it
+	    step = 0;
+	    for ( int i = 0; i < 5; ++i )
+		{
+		    if ( verti >= 0 && verti < HEIGHT &&
+			 horiz >= 0 && horiz < WIDTH )
 			{
-				if ( verti >= 0 && verti < HEIGHT &&
-						 horiz >= 0 && horiz < WIDTH )
+			    while( gameBoard[verti][horiz] == marker )
 				{
-					while( gameBoard[verti][horiz] == marker )
-					{
-						/*basicly if we managed five in a row*/
-						if( (horiz == xpos+step))
-							return true;
+				    /*basicly if we managed five in a row*/
+				    if( (horiz == xpos+step))
+					return true;
 
-						if ( --horiz < 0 || ++verti > HEIGHT-1 )
-								break;
-					}
+				    if ( --horiz < 0 || ++verti > HEIGHT-1 )
+					break;
 				}
-				++step;
-				horiz = xpos+4-step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
-				verti = ypos-4+step;
 			}
+		    ++step;
+		    horiz = xpos+4-step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
+		    verti = ypos-4+step;
+		}
 
-			return false;
+	    return false;
 	}	
 
 	public String print()
@@ -180,7 +180,7 @@ class ChatImpl extends ChatPOA
 		    board += '\n';
 		}
 	    return board;
-		    //		System.out.println(Arrays.toString(gameBoard));
+	    //		System.out.println(Arrays.toString(gameBoard));
 	}
     };
 
@@ -206,13 +206,32 @@ class ChatImpl extends ChatPOA
 		return;
 	    }
 	if( theGame.set(xCoord,yCoord,usr.marker) )
-	{
-	    printGameBoard(callobj);
-		if (	theGame.checkWinner(xCoord,yCoord,usr.marker) )
-		{	
-			say(callobj, "You won");
-		}
-	}
+	    {
+		/* Broadcast updated gameboard to all currently active players */
+		for( User obj : USERS )
+		    {
+			if(obj.playing)
+			    {
+				obj.ref.callback("Game board updated:");
+				obj.ref.callback(theGame.print());
+			    }
+		    }
+
+		if ( theGame.checkWinner(xCoord,yCoord,usr.marker) )
+		    {	
+			theGame.clear_board();
+
+			/* Broadcast reset gameboard to all currently active players */
+			for( User obj : USERS )
+			    {
+				if(obj.playing)
+				    {
+					obj.ref.callback("Team " + usr.marker + " has won\nRestarting the game");
+					obj.ref.callback(theGame.print());
+				    }
+			    }
+		    }
+	    }
 	else
 	    say(callobj, "Invalid move");
 
@@ -351,7 +370,7 @@ public class ChatServer
 
 	    // get the root naming context
 	    org.omg.CORBA.Object objRef = 
-		           orb.resolve_initial_references("NameService");
+		orb.resolve_initial_references("NameService");
 	    NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
 
 	    // obtain object reference from the servant (impl)

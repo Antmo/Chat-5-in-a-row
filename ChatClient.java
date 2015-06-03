@@ -26,7 +26,7 @@ class ChatCallbackImpl extends ChatCallbackPOA
 public class ChatClient
 {
     static Chat chatImpl;
-    static String name = "NULL";
+    static String name = "default";
     static String commands = 
 	"# Available commands\tDescription\n# 'join <name>'\t\tjoin a chat room\n# 'post <message>'\tpost a message\n# 'list'\t\tlist members in chat room\n# 'play <marker>'\tjoin a game of five in a row\n# 'set X Y'\t\tset marker at position (X,Y)\n# 'quit'\t\tleave the game\n# 'leave'\t\tleave the chat\n# 'help'\t\tdisplay this message\n# '?'\t\t\tequivalent to 'help'\n";
 
@@ -94,7 +94,9 @@ public class ChatClient
 	    {
 	    case "join" :
 		if (args.length != 2 )
-		    chatImpl.say(cref, commands);
+		    chatImpl.say(cref, "usage: join <name>");
+		else if( !name.equals("default") )
+		    chatImpl.say(cref, "you're already in the chat");
 		else if (chatImpl.join(cref,args[1]) )
 		    name = args[1];
 		break;
@@ -104,17 +106,22 @@ public class ChatClient
 		for(int i = 1; i < args.length; ++i)
 		    b.append(args[i] + " ");
 
-		chatImpl.post(cref, b.toString(), name);
+		String msg = b.toString();
+		if( !("".equals(msg)) )
+		    chatImpl.post(cref, msg, name);
+		else
+		    chatImpl.say(cref, "usage: post <message>");
 		break;
 	    case "leave" :
 		chatImpl.leave(cref, name);
+		name = "default";
 		break;
 	    case "list" :
 		chatImpl.list(cref);
 		break;
 	    case "play" :
 		if (args.length == 2 )
-		    chatImpl.play(cref, name,(char)'X');
+		    chatImpl.play(cref, name, args[1].charAt(0));
 		else
 		    chatImpl.say(cref, "usage: play <marker>");
 		break;
@@ -122,16 +129,17 @@ public class ChatClient
 		chatImpl.quit(cref, name);
 		break;
 	    case "set" :
+		/* Crashes on some input */
 		if (args.length == 3 )
 		    chatImpl.set(cref,name,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
 		else
-		    chatImpl.say(cref, commands);
+		    chatImpl.say(cref, "usage: set <X-coord> <Y-coord>");
 		break;
 	    case "help" :
 		chatImpl.say(cref, commands);
 		break;
 	    case "?" :
-		chatImpl.say(cref, "command not found");
+		chatImpl.say(cref, commands);
 		break;
 	    default:
 		chatImpl.say(cref, "command not found");
