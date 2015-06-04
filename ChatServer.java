@@ -49,6 +49,7 @@ class ChatImpl extends ChatPOA
 	{
 	    for(char[] row : gameBoard )
 		Arrays.fill(row, def_mark);
+	    free_slots = HEIGHT*WIDTH;
 	}
 
 	public boolean set(int x, int y, char marker)
@@ -144,8 +145,8 @@ class ChatImpl extends ChatPOA
 		}
 
 	    /* Anti-diagonal */
-	    verti = ypos+4;
-	    horiz = xpos-4; //this is tricky havnt thought so hard on it
+	    verti = ypos-4;
+	    horiz = xpos+4; //this is tricky havnt thought so hard on it
 	    step = 0;
 	    for ( int i = 0; i < 5; ++i )
 		{
@@ -155,7 +156,7 @@ class ChatImpl extends ChatPOA
 			    while( gameBoard[verti][horiz] == marker )
 				{
 				    /*basicly if we managed five in a row*/
-				    if( (horiz == xpos+step))
+				    if( (horiz == xpos-step))
 					return true;
 
 				    if ( --horiz < 0 || ++verti > HEIGHT-1 )
@@ -163,7 +164,7 @@ class ChatImpl extends ChatPOA
 				}
 			}
 		    ++step;
-		    horiz = xpos-4+step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
+		    horiz = xpos+4-step; //tricky tricky +4 because of arrays 0-9 etc yadayada not a generic solution
 		    verti = ypos-4+step;
 		}
 
@@ -232,20 +233,20 @@ class ChatImpl extends ChatPOA
 			theGame.clear_board();
 
 			/* Broadcast reset gameboard to all currently active players */
-			for( User obj : USERS )
-			    {
-				if(obj.playing)
-				    {
-					obj.ref.callback("Team " + usr.marker + " has won");
-					obj.ref.callback("Current score: [X:" + theGame.tm1_score + "] vs [O:" + theGame.tm2_score + "]");
-					obj.ref.callback("Restarting the game ...");
-					obj.ref.callback(theGame.print());
-				    }
-			    }
+			broadcast_toplayers(
+					    "Team " + usr.marker + " has won\n"
+					    +"Current score: [X:" + theGame.tm1_score + "] vs [O:" + theGame.tm2_score + "]\n"
+					    +"Restarting the game ...\n"
+					    +theGame.print() );
 		    }
-		elseif( --theGame.free_slots == 0 )
+		else if( --theGame.free_slots == 0 )
 		{
-			/* Reset board & broadcast to active players*/
+		    theGame.clear_board();
+		    broadcast_toplayers("Board is full, DRAW!\n"
+					+"Current score: [X:" + theGame.tm1_score + "] vs [O:" + theGame.tm2_score + "]\n"
+					+"Restarting the game ...\n"
+					+theGame.print() );
+		    /* Reset board & broadcast to active players*/
 		}
 		
 	    }
@@ -292,7 +293,11 @@ class ChatImpl extends ChatPOA
 
     public void post(ChatCallback callobj, String msg, String name)
     {
-	broadcast(name +" says: "+  msg);
+	User usr = findUser(name);
+	if (usr != null)
+	    broadcast(name +" says: "+  msg);
+	else
+	    callobj.callback("only active clients can post, type join <name> to join the chat.");
     }
 
     public void leave(ChatCallback callobj, String name)
@@ -368,6 +373,17 @@ class ChatImpl extends ChatPOA
 		obj.ref.callback(msg);
 	    }
     }
+
+    private void broadcast_toplayers(String msg)
+    {
+	for( User obj : USERS )
+	    {
+		if ( obj.playing )
+		    obj.ref.callback(msg);
+	    }
+    }
+
+
 } /* end class ChatImpl */
 
 public class ChatServer 

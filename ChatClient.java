@@ -7,6 +7,7 @@ import org.omg.PortableServer.POA;
 
 import java.util.Scanner;
 import java.util.Arrays;
+import java.lang.NumberFormatException;
 
  
 class ChatCallbackImpl extends ChatCallbackPOA
@@ -120,7 +121,7 @@ public class ChatClient
 		chatImpl.list(cref);
 		break;
 	    case "play" :
-		if (args.length == 2 )
+		if ( args.length == 2 )
 		    chatImpl.play(cref, name, args[1].charAt(0));
 		else
 		    chatImpl.say(cref, "usage: play <marker>");
@@ -130,8 +131,17 @@ public class ChatClient
 		break;
 	    case "set" :
 		/* Crashes on some input */
-		if (args.length == 3 )
-		    chatImpl.set(cref,name,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
+		if ( args.length == 3 )
+		    {
+			try 
+			    {
+				chatImpl.set(cref, name, Integer.parseInt(args[1]), Integer.parseInt(args[2]));			    
+			    }
+			catch(NumberFormatException e)
+			    {
+				chatImpl.say(cref, "unable to parse input, try again");
+			    }
+		    }
 		else
 		    chatImpl.say(cref, "usage: set <X-coord> <Y-coord>");
 		break;
